@@ -1,27 +1,60 @@
-from pydantic import BaseModel
-from typing import Annotated, Optional, List
-from fastapi import Form, File, UploadFile
+from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 
-class EventBase(BaseModel):
-    title: Annotated[str, Form()]
-    description: Annotated[str, Form()]
-    date: Annotated[str, Form()]
-    location: Annotated[str, Form()]
-    flyer_filename: Annotated[Optional[UploadFile], File(None)] = None
-    
+#RSVP
+class RSVPCreate(BaseModel):
+    name: str
+    email: str
 
 
-class EventCreate(EventBase):
-    pass
+class RSVPRead(BaseModel):
+    id: int
+    name: str
+    email: str
+    event_id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
-class Event(EventBase):
-    id: Annotated[int, Form()]
-    rsvps: List[str] = []
+#Event
+class EventCreate(BaseModel):
+    title: str
+    description: str
+    date: str
+    location: str
+    flyer_filename: Optional[str] = None
+
+
+class EventUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    date: Optional[str] = None
+    location: Optional[str] = None
+    flyer_filename: Optional[str] = None
+
+
+class EventRead(BaseModel):
+    id: int
+    title: str
+    description: str
+    date: str
+    location: str
+    flyer_filename: Optional[str] = None
+    created_at: datetime
+    rsvps: list[RSVPRead] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PaginatedEvents(BaseModel):
+    items: list[EventRead]
+    total: int
+    skip: int
+    limit: int
 
 
 
-class RSVP(BaseModel):
-    name: Annotated[str, Form()]
-    email: Annotated[str, Form()]
